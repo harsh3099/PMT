@@ -1,31 +1,46 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "../styles/form.css";
-import { IoEyeOff, IoEye } from "react-icons/io5";
-import { getResultData, setResultData } from "../helper";
+import NoteContext from "../NoteContext";
+import { ToastContainer, toast } from "react-toastify";
+
+// import { getResultData, setResultData,data } from "../helper";
  
 
 const AddEditForm = () => {
   const { id } = useParams();
-  
+  const a=useContext(NoteContext);
 
-
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [formData, setFormData] = useState({
     id: 1,
-    formType: "",
     domainName: "",
     domainUrl: "",
     username: "",
     password: "",
+    pin:"",
     accountNumber: "",
     ifscCode: "",
+    transactionpassword:""
   });
+  const tdata={
+    id: 1,
+    domainName: "",
+    domainUrl: "",
+    username: "",
+    password: "",
+    pin:"",
+    accountNumber: "",
+    ifscCode: "",
+    transactionpassword:""
+  };
 
   const handleSubmit = (e) => {
+    // console.log(formData);
     e.preventDefault();
-    const _lData = getResultData();
-    if(!id){
+    const _lData = a.getResultData();
+    if(!parseInt(id)){
         if (_lData.length) {
             formData.id = Number(_lData[_lData.length - 1].id) + 1;
           }
@@ -38,17 +53,212 @@ const AddEditForm = () => {
           }
         
     }   
-    setResultData(_lData);
+    //
+    console.log(_lData);
+    a.setResultData(_lData);
     navigate("/");
+   
   };
 
+
+  useEffect(()=>{
+    if(a.data.domainName.length>0){
+      setFormData(a.data);
+    }else{
+      setFormData(tdata);
+    }
+  },[])
+  const handleCancel=()=>{
+    localStorage.setItem("formDataList",JSON.stringify([...a.formData]));
+    a.setData(tdata);
+    navigate("/");
+  }
+
   const onTextChange = (val, key) => {
-    setFormData({ ...formData, [key]: val ? val : "" });
+    setFormData({ ...formData, [key]: val });
+  };
+  const renderFields = () => {
+    switch (selectedCategory) {
+      case "bankAccount":
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="Url">Url:</label>
+              <input required type="url" placeholder="https://example.com" 
+              value={domainUrl}
+              onChange={(e) => {
+                onTextChange(e.target.value, "domainUrl");
+              }}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="Username">Username:</label>
+              <input required type="text" 
+              value={username}
+              onChange={(e)=>{
+                onTextChange(e.target.value,"username");
+              }} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="Password_pin">Password:</label>
+              <input
+                required
+                type="password"
+                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$"
+                value={password}
+                placeholder="Example@123"
+                onChange={(e) => {
+                  onTextChange(e.target.value, "password");
+                }}
+              />
+              <div className="form-group">
+                <label htmlFor="Accountnumber">Account Number:</label>
+                <input
+                  required
+                  type="text"
+                  value={accountNumber}
+                  onChange={(e) => {
+                    onTextChange(e.target.value, "accountNumber");
+                  }}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="ifscNumber">IFSC Code:</label>
+              <input required 
+              type="text"  
+               value={ifscCode}
+               onChange={(e) => {
+                 onTextChange(e.target.value, "ifscCode");
+               }}/>
+            </div>
+            <div className="form-group">
+              <label htmlFor="transctionPassword">Transaction Password:</label>
+              <input required type="password" id="transctionPassword" name="transctionPassword" 
+               value={ transactionpassword}
+               placeholder="Example@123"
+               onChange={(e) => {
+                 onTextChange(e.target.value, "transactionpassword");
+               }}
+              />
+            </div>
+          </>
+        );
+      case "socialMedia":
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="url">Url:</label>
+              <input
+                required
+                type="url"
+                id="Url"
+                name="Url"
+                placeholder="https://example.com"
+                value={domainUrl}
+                onChange={(e) => {
+                  onTextChange(e.target.value, "domainUrl");
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="Username">Username:</label>
+              <input
+                required
+                type="text"
+                id="Username"
+                name="Username"
+                value={username}
+                onChange={(e) => {
+                  onTextChange(e.target.value, "username");
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Password:</label>
+              <input
+                required
+                type="password"
+                id="password"
+                name="password"
+                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$"
+                value={password}
+                placeholder="Example@123"
+                onChange={(e) => {
+                  onTextChange(e.target.value, "password");
+                }}
+              />
+            </div>
+          </>
+        );
+      case "atm":
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="password">Pin:</label>
+              <input
+                required
+                type="password"
+                pattern="[0-9]{4}"
+                value={password}
+                placeholder="pin must be 4 digit"
+                onChange={(e) => {
+                  onTextChange(e.target.value, "password");
+                }}
+              />
+            </div>
+          </>
+        );
+      case "otts":
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="url">Url:</label>
+              <input
+                required
+                type="url"
+                placeholder="https://example.com"
+                value={formData.domainUrl}
+                onChange={(e) => {
+                  onTextChange(e.target.value, "domainUrl");
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="Username">Username:</label>
+              <input required type="text" 
+              value={username}
+              onChange={(e)=>{
+                onTextChange(e.target.value,"username");
+              }} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Password:</label>
+              <input
+                required
+                type="password"
+                id="password"
+                name="password"
+                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$"
+                value={password}
+                placeholder="Example@123"
+                onChange={(e) => {
+                  onTextChange(e.target.value, "password");
+                }}
+              />
+            </div>
+           
+          </>
+        );
+
+      default:
+        return null;
+    }
   };
 
   const navigate = useNavigate();
 
-  const { formType, domainName } = formData;
+  const {  domainName,domainUrl,password,username,accountNumber,ifscCode,transactionpassword } = formData;
   
   return (
     <div className="form-container">
@@ -57,8 +267,8 @@ const AddEditForm = () => {
           <label>Select Category:</label>
           <select
             className="select1"
-            value={formType}
-            onChange={(e) => onTextChange(e.target.value, "formType")}
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <option value="">Select Category</option>
             <option value="bankAccount">Banking Details</option>
@@ -67,6 +277,7 @@ const AddEditForm = () => {
             <option value="otts">OTTs Platform</option>
           </select>
         </div>
+        {renderFields()}
         <div className="form-group">
           <label htmlFor="Domain">Name:</label>
           <input
@@ -80,9 +291,7 @@ const AddEditForm = () => {
           <button
             type="button"
             className="cancel-button"
-            onClick={() => {
-              navigate("/");
-            }}
+            onClick={handleCancel}
           >
             Cancel
           </button>
@@ -92,6 +301,7 @@ const AddEditForm = () => {
         </div>
       </form>
     </div>
+    
   );
 };
 

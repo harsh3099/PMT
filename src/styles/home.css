@@ -74,8 +74,10 @@ tr:nth-child(even) {
   width: 10rem;
 }
 .action{
-  width: 5rem;
+  width: 4rem;
+  gap: 200px;
 }
+
 tr:hover {
   background-color: #ddd;
 }
@@ -214,5 +216,5 @@ button[type="cancel"]:hover {
   color: #0056b3;
 }
 .visible_password{
-  padding-left: 4rem;
+  padding-left: 2rem;
 }
